@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+
+  <meta charset="UTF-8">
+  
+<link rel="apple-touch-icon" type="image/png" href="https://cpwebassets.codepen.io/assets/favicon/apple-touch-icon-5ae1a0698dcc2402e9712f7d01ed509a57814f994c660df9f7a952f3060705ee.png" />
+
+<link rel="shortcut icon" type="image/x-icon" href="https://cpwebassets.codepen.io/assets/favicon/favicon-aec34940fbc1a6e787974dcd360f2c6b63348d4b1f4e06c77743096d55480f33.ico" />
+
+
+
+
+  <title> Movie Day</title>
+  
+  
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css'>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+  <script>
+    window.console = window.console || function(t) {};
+  </script>
+
+  
+  
+  <script>
+  if (document.location.search.match(/type=embed/gi)) {
+    window.parent.postMessage("resize", "*");
+  }
+</script>
+
+
+</head>
+
+<body translate="no" >
+  <nav class="fixed-top d-flex justify-content-center navbar p-2">
+      <a href="index.html" class="p-0 navbar-brand d-none d-lg-block"
+        >Movie Finder</a
+      >
+      <form id="search-form" class="form-inline">
+        <input
+          id="search"
+          class="form-control mr-sm-2"
+          type="search"
+          placeholder="Search"
+          aria-label="Search"
+        />
+      </form>
+    </nav>
+    <section>
+      <div class="container-fluid mt-5 p-5">
+        <div id="movie-content" class="row d-flex justify-content-center">
+        </div>
+      </div>
+    </section>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        <li class="page-item">
+          <a id="previous" class="btn page-link" tabindex="-1"><h5>Previous</h5></a>
+        </li>
+        <li class="page-item" style="padding-left: 30px;">
+          <a id="next" class="btn page-link"><h5>Next</h5></a>
+        </li>
+      </ul>
+    </nav>
+    <div class="footer">
+       <p>@2021 Surajeet Barman</p>
+    </div>
+
+  
+<script id="rendered-js" >
+const API_KEY = "249f222afb1002186f4d88b2b5418b55";
+
+const API_SEARCH = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=en-US&query=`;
+
+const IMAGE_PATH = "https://image.tmdb.org/t/p/w500";
+
+let page = "1";
+
+const API_URL = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=en-US&sort_by=popularity.desc&include_video=true&page=`;
+
+const mainContent = document.getElementById("movie-content");
+// search form elements
+const form = document.getElementById("search-form");
+const search = document.getElementById("search");
+// pagination elements
+const pageLinks = document.querySelectorAll(".page-link");
+console.log(pageLinks);
+
+// initially get the most popular movies list's first page
+getMovies(API_URL + page);
+
+// previous and next page
+pageLinks.forEach(pageLink => {
+  pageLink.addEventListener("click", () => {
+    if (pageLink.id === "next") {
+      page++;
+      getMovies(API_URL + page);
+    }
+    if (pageLink.id === "previous" && page > 1) {
+      page--;
+      getMovies(API_URL + page);
+    }
+  });
+});
+
+// search for a movie
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  console.log(search.value);
+  const query = search.value;
+  if (query) {
+    getMovies(API_SEARCH + query);
+  }
+});
+
+async function getMovies(url) {
+  const resp = await fetch(url);
+  const respData = await resp.json();
+  console.log(respData);
+  console.log(respData.total_pages);
+  showMovies(respData.results);
+}
+
+function showMovies(movies) {
+  mainContent.innerHTML = "";
+  movies.forEach(movie => {
+    const movieTitle = movie.title;
+    const moviePoster = movie.poster_path;
+    const movieVote = movie.vote_average;
+    const movieElm = document.createElement("div");
+    movieElm.classList.add(
+    "col-xs-12",
+    "col-sm-6",
+    "col-md-4",
+    "col-lg-3",
+    "p-0");
+
+    movieElm.innerHTML = `
+    <div class="movie-card">
+              <img
+                class="img-fluid movie-img"
+                src="${IMAGE_PATH}${moviePoster}"
+                onError="this.onerror=null;this.src='https://i.ebayimg.com/images/g/1EMAAMXQdGJR2-n3/s-l1600.jpg';"
+                alt="Sorry, something went wrong"
+              />
+              <div
+                class="movie-description p-3 d-flex justify-content-between align-items-center"
+              >
+                <h3 class="movie-title">${movieTitle}</h3>
+                <h3 class="movie-vote">${movieVote}</h3>
+              </div>
+            </div>
+    `;
+    mainContent.appendChild(movieElm);
+  });
+}
+
+    </script>
+
+  
+
+</body>
+
+</html>
+ 
